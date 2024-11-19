@@ -1,9 +1,11 @@
 name: docker-build
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Docker image tag"
+        required: true
 
 jobs:
   multi-arch-push:
@@ -31,10 +33,6 @@ jobs:
           username: tomava
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get Latest Tag
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@04e8485ecb6487243907e330d522ff60f02283ce # pin@v1.4.0
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -44,6 +42,6 @@ jobs:
           push: true
           tags: |
             tomava/cloudflared:latest
-            tomava/cloudflared:${{ steps.previoustag.outputs.tag }}
+            tomava/cloudflared:${{ github.event.inputs.tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
